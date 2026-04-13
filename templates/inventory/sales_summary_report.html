@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+
+{% block title %}Sales Summary Report{% endblock %}
+
+{% block content %}
+<h1>Sales Summary Report</h1>
+
+<div class="form-box" style="max-width: 100%; margin-bottom: 20px;">
+    <form method="get">
+        <p>
+            <label>From Date</label>
+            <input type="date" name="from_date" value="{{ from_date }}">
+        </p>
+
+        <p>
+            <label>To Date</label>
+            <input type="date" name="to_date" value="{{ to_date }}">
+        </p>
+
+        <button type="submit" class="btn">Filter</button>
+        <a href="{% url 'sales_summary_report' %}" class="btn btn-secondary">Reset</a>
+    </form>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>Rank</th>
+            <th>Product</th>
+            <th>Total Quantity Sold</th>
+            <th>Total Revenue</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for row in summary %}
+        <tr>
+            <td>{{ forloop.counter }}</td>
+            <td>{{ row.product__name }}</td>
+            <td>{{ row.total_qty_sold }}</td>
+            <td>{{ row.total_revenue }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4">No sales summary found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

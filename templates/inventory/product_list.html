@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Products{% endblock %}
+
+{% block content %}
+<h1>Products</h1>
+
+
+{% for group in request.user.groups.all %}
+    {% if group.name == "Admin" or group.name == "special" %}
+        <p>
+            <a href="{% url 'add_product' %}" class="btn">Add Product</a>
+            <a href="{% url 'export_products_csv' %}" class="btn btn-secondary">Export CSV</a>
+        </p>
+    {% endif %}
+{% endfor %}
+
+<div class="form-box" style="max-width: 100%; margin-bottom: 20px;">
+    <form method="get">
+        <p>
+            <label>Search Product</label>
+            <input type="text" name="q" value="{{ search_query }}" placeholder="Enter product name">
+        </p>
+
+        <p>
+            <label>Category</label>
+            <select name="category">
+                <option value="">All Categories</option>
+                {% for category in categories %}
+                    <option value="{{ category.id }}" {% if selected_category == category.id|stringformat:"s" %}selected{% endif %}>
+                        {{ category.name }}
+                    </option>
+                {% endfor %}
+            </select>
+        </p>
+
+        <button type="submit" class="btn">Filter</button>
+        <a href="{% url 'product_list' %}" class="btn btn-secondary">Reset</a>
+    </form>
+</div>
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Name</th>
+            <th>Quantity</th>
+            <th>Buy Price</th>
+            <th>Sale Price</th>
+            <th>Category</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for product in products %}
+        <tr>
+            <td>{{ product.id }}</td>
+            <td>{{ product.name }}</td>
+            <td>{{ product.quantity }}</td>
+            <td>{{ product.buy_price }}</td>
+            <td>{{ product.sale_price }}</td>
+            <td>{{ product.category.name }}</td>
+            <td class="actions">
+                {% for group in request.user.groups.all %}
+                    {% if group.name == "Admin" or group.name == "special" %}
+                        <a href="{% url 'edit_product' product.id %}" class="btn btn-secondary">Edit</a>
+                        <a href="{% url 'delete_product' product.id %}" class="btn btn-danger">Delete</a>
+                    {% endif %}
+                {% endfor %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="7">No products found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

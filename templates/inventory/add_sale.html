@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+
+{% block title %}Sale Form{% endblock %}
+
+{% block content %}
+<h1>Sale Form</h1>
+
+<div class="form-box">
+    <form method="post">
+        {% csrf_token %}
+        {{ form.non_field_errors }}
+        {{ form.as_p }}
+        <button type="submit" class="btn">Save</button>
+    </form>
+</div>
+{% endblock %}

@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block title %}Categories{% endblock %}
+
+{% block content %}
+<h1>Categories</h1>
+
+{% for group in request.user.groups.all %}
+    {% if group.name == "Admin" %}
+        <p><a href="{% url 'add_category' %}" class="btn">Add Category</a></p>
+    {% endif %}
+{% endfor %}
+
+<table>
+    <thead>
+        <tr>
+            <th>ID</th>
+            <th>Category Name</th>
+            <th>Actions</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for category in categories %}
+        <tr>
+            <td>{{ category.id }}</td>
+            <td>{{ category.name }}</td>
+            <td class="actions">
+                {% for group in request.user.groups.all %}
+                    {% if group.name == "Admin" %}
+                        <a href="{% url 'edit_category' category.id %}" class="btn btn-secondary">Edit</a>
+                        <a href="{% url 'delete_category' category.id %}" class="btn btn-danger">Delete</a>
+                    {% endif %}
+                {% endfor %}
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="3">No categories found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

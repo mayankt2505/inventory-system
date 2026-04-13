@@ -1,0 +1,88 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard{% endblock %}
+
+{% block content %}
+<h1>Dashboard</h1>
+
+<div class="card-grid">
+    <div class="card">
+        <h3>Total Categories</h3>
+        <p>{{ category_count }}</p>
+    </div>
+
+    <div class="card">
+        <h3>Total Products</h3>
+        <p>{{ product_count }}</p>
+    </div>
+
+    <div class="card">
+        <h3>Total Sales</h3>
+        <p>{{ sale_count }}</p>
+    </div>
+
+    <div class="card">
+        <h3>Inventory Value</h3>
+        <p>{{ total_inventory_value }}</p>
+    </div>
+
+    <div class="card">
+        <h3>Sales Revenue</h3>
+        <p>{{ total_sales_revenue }}</p>
+    </div>
+</div>
+
+<br><br>
+
+<h2>Low Stock Products</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Quantity</th>
+            <th>Category</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for product in low_stock_products %}
+        <tr>
+            <td>{{ product.name }}</td>
+            <td>{{ product.quantity }}</td>
+            <td>{{ product.category.name }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="3">No low stock products found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+
+<br><br>
+
+<h2>Recent Sales</h2>
+<table>
+    <thead>
+        <tr>
+            <th>Product</th>
+            <th>Qty</th>
+            <th>Price</th>
+            <th>Date</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for sale in recent_sales %}
+        <tr>
+            <td>{{ sale.product.name }}</td>
+            <td>{{ sale.qty }}</td>
+            <td>{{ sale.price }}</td>
+            <td>{{ sale.date }}</td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4">No recent sales found.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}
