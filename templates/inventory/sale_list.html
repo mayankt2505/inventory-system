@@ -5,15 +5,12 @@
 {% block content %}
 <h1>Sales</h1>
 
-
-{% for group in request.user.groups.all %}
-    {% if group.name == "Admin" or group.name == "special" %}
-        <p>
-            <a href="{% url 'add_sale' %}" class="btn">Add Sale</a>
-            <a href="{% url 'export_sales_csv' %}" class="btn btn-secondary">Export CSV</a>
-        </p>
-    {% endif %}
-{% endfor %}
+{% if can_manage_sales %}
+    <p>
+        <a href="{% url 'add_sale' %}" class="btn">Add Sale</a>
+        <a href="{% url 'export_sales_csv' %}" class="btn btn-secondary">Export CSV</a>
+    </p>
+{% endif %}
 
 <div class="filter-container">
     <form method="get">
@@ -61,12 +58,10 @@
             <td>{{ sale.price }}</td>
             <td>{{ sale.date }}</td>
             <td class="actions">
-                {% for group in request.user.groups.all %}
-                    {% if group.name == "Admin" or group.name == "special" %}
-                        <a href="{% url 'edit_sale' sale.id %}" class="btn btn-secondary">Edit</a>
-                        <a href="{% url 'delete_sale' sale.id %}" class="btn btn-danger">Delete</a>
-                    {% endif %}
-                {% endfor %}
+                {% if can_manage_sales %}
+                    <a href="{% url 'edit_sale' sale.id %}" class="btn btn-secondary">Edit</a>
+                    <a href="{% url 'delete_sale' sale.id %}" class="btn btn-danger">Delete</a>
+                {% endif %}
             </td>
         </tr>
         {% empty %}
@@ -76,9 +71,5 @@
         {% endfor %}
     </tbody>
 </table>
+
 {% endblock %}
-{% for group in request.user.groups.all %}
-    {% if group.name == "Admin" or group.name == "special" or group.name == "Admin_Electronics" or group.name == "Admin_Sports" %}
-        <p><a href="{% url 'add_sale' %}" class="btn">Add Sale</a></p>
-    {% endif %}
-{% endfor %}

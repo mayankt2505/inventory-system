@@ -5,46 +5,41 @@
 {% block content %}
 <h1>Products</h1>
 
-
-{% for group in request.user.groups.all %}
-    {% if group.name == "Admin" or group.name == "special" %}
-        <p>
-            <a href="{% url 'add_product' %}" class="btn">Add Product</a>
-            <a href="{% url 'export_products_csv' %}" class="btn btn-secondary">Export CSV</a>
-        </p>
-    {% endif %}
-{% endfor %}
+{% if can_manage_products %}
+    <p>
+        <a href="{% url 'add_product' %}" class="btn">Add Product</a>
+        <a href="{% url 'export_products_csv' %}" class="btn btn-secondary">Export CSV</a>
+    </p>
+{% endif %}
 
 <div class="form-box" style="max-width: 100%; margin-bottom: 20px;">
-    <form method="get">
-        <p>
-            <label>Search Product</label>
-            <div class="filter-container">
-<form method="get">
-    <div class="filter-row">
-        <div class="filter-group">
-            <label>Search Product</label>
-            <input type="text" name="q" value="{{ search_query }}" placeholder="Enter product name">
-        </div>
+    <div class="filter-container">
+        <form method="get">
+            <div class="filter-row">
+                <div class="filter-group">
+                    <label>Search Product</label>
+                    <input type="text" name="q" value="{{ search_query }}" placeholder="Enter product name">
+                </div>
 
-        <div class="filter-group">
-            <label>Category</label>
-            <select name="category">
-                <option value="">All Categories</option>
-                {% for cat in categories %}
-                    <option value="{{ cat.id }}" {% if selected_category == cat.id|stringformat:"s" %}selected{% endif %}>
-                        {{ cat.name }}
-                    </option>
-                {% endfor %}
-            </select>
-        </div>
-    </div>
+                <div class="filter-group">
+                    <label>Category</label>
+                    <select name="category">
+                        <option value="">All Categories</option>
+                        {% for cat in categories %}
+                            <option value="{{ cat.id }}" {% if selected_category == cat.id|stringformat:"s" %}selected{% endif %}>
+                                {{ cat.name }}
+                            </option>
+                        {% endfor %}
+                    </select>
+                </div>
+            </div>
 
-    <div class="filter-buttons">
-        <button type="submit" class="btn">Filter</button>
-        <a href="{% url 'product_list' %}" class="btn btn-secondary">Reset</a>
+            <div class="filter-buttons">
+                <button type="submit" class="btn">Filter</button>
+                <a href="{% url 'product_list' %}" class="btn btn-secondary">Reset</a>
+            </div>
+        </form>
     </div>
-</form>
 </div>
 
 <table>
@@ -69,12 +64,10 @@
             <td>{{ product.sale_price }}</td>
             <td>{{ product.category.name }}</td>
             <td class="actions">
-                {% for group in request.user.groups.all %}
-                    {% if group.name == "Admin" or group.name == "special" %}
-                        <a href="{% url 'edit_product' product.id %}" class="btn btn-secondary">Edit</a>
-                        <a href="{% url 'delete_product' product.id %}" class="btn btn-danger">Delete</a>
-                    {% endif %}
-                {% endfor %}
+                {% if can_manage_products %}
+                    <a href="{% url 'edit_product' product.id %}" class="btn btn-secondary">Edit</a>
+                    <a href="{% url 'delete_product' product.id %}" class="btn btn-danger">Delete</a>
+                {% endif %}
             </td>
         </tr>
         {% empty %}

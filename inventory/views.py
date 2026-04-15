@@ -60,27 +60,41 @@ def category_list(request):
     return render(request, "inventory/category_list.html", context)
 
 
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+from .models import Product, Category
+
 @login_required
 def product_list(request):
-    products = Product.objects.select_related("category", "media").all()
+    products = Product.objects.select_related('category').all()
     categories = Category.objects.all()
 
-    search_query = request.GET.get("q", "").strip()
-    category_id = request.GET.get("category", "").strip()
+    search_query = request.GET.get('q', '').strip()
+    selected_category = request.GET.get('category', '').strip()
 
     if search_query:
         products = products.filter(name__icontains=search_query)
 
-    if category_id:
-        products = products.filter(category_id=category_id)
+    if selected_category:
+        products = products.filter(category_id=selected_category)
+
+    can_manage_products = (
+        request.user.is_superuser
+        or request.user.has_perm('inventory.add_product')
+        or request.user.has_perm('inventory.change_product')
+        or request.user.has_perm('inventory.delete_product')
+    )
 
     context = {
-        "products": products,
-        "categories": categories,
-        "search_query": search_query,
-        "selected_category": category_id,
+        'products': products,
+        'categories': categories,
+        'search_query': search_query,
+        'selected_category': selected_category,
+        'can_manage_products': can_manage_products,
     }
-    return render(request, "inventory/product_list.html", context)
+    return render(request, 'inventory/product_list.html', context)
+
+
 
 @login_required
 def sale_list(request):
@@ -101,14 +115,23 @@ def sale_list(request):
 
     sales = sales.order_by("-date", "-id")
 
+    # ✅ ADD THIS BLOCK
+    can_manage_sales = (
+        request.user.is_superuser
+        or request.user.has_perm('inventory.add_sale')
+        or request.user.has_perm('inventory.change_sale')
+        or request.user.has_perm('inventory.delete_sale')
+    )
+
     context = {
         "sales": sales,
         "search_query": search_query,
         "from_date": from_date,
         "to_date": to_date,
+        "can_manage_sales": can_manage_sales,   # ✅ ADD THIS
     }
-    return render(request, "inventory/sale_list.html", context)
 
+    return render(request, "inventory/sale_list.html", context)
 
 @login_required
 def add_category(request):
