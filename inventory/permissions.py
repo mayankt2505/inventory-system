@@ -2,7 +2,11 @@ from django.http import HttpResponseForbidden
 
 
 def is_admin(user):
-    return user.is_authenticated and user.groups.filter(name="Admin").exists()
+    return user.is_authenticated and (
+        user.groups.filter(name="Admin").exists()
+        or user.groups.filter(name="Admin_Electronics").exists()
+        or user.groups.filter(name="Admin_Sports").exists()
+    )
 
 
 def is_special(user):
@@ -25,5 +29,5 @@ def can_manage_sales(user):
     return is_admin(user) or is_special(user)
 
 
-def forbidden_response():
+def forbidden_response(request):
     return HttpResponseForbidden("You do not have permission to perform this action.")

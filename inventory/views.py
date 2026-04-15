@@ -11,6 +11,10 @@ from .permissions import (
 )
 from django.db.models import Sum, F, DecimalField, ExpressionWrapper
 from django.contrib import messages
+import json
+
+import json
+from django.db.models.functions import TruncMonth
 
 import csv
 from django.http import HttpResponse
@@ -151,11 +155,10 @@ def delete_category(request, id):
         "cancel_url": "category_list",
     })
 
-
 @login_required
 def add_product(request):
     if not can_manage_products(request.user):
-        return forbidden_response()
+        return forbidden_response(request)
 
     form = ProductForm(request.POST or None)
     if form.is_valid():
@@ -199,11 +202,10 @@ def delete_product(request, id):
         "cancel_url": "product_list",
     })
 
-
 @login_required
 def add_sale(request):
     if not can_manage_sales(request.user):
-        return forbidden_response()
+        return forbidden_response(request)
 
     form = SaleForm(request.POST or None)
     if form.is_valid():
@@ -300,7 +302,7 @@ def export_sales_csv(request):
 @login_required
 def sales_summary_report(request):
     if not can_manage_sales(request.user):
-        return forbidden_response()
+        return forbidden_response(request)
 
     from_date = request.GET.get("from_date", "").strip()
     to_date = request.GET.get("to_date", "").strip()
@@ -318,7 +320,7 @@ def sales_summary_report(request):
         output_field=DecimalField(max_digits=15, decimal_places=2)
     )
 
-    summary = (
+    summary = list(
         sales.values("product__id", "product__name")
         .annotate(
             total_qty_sold=Sum("qty"),
@@ -327,10 +329,37 @@ def sales_summary_report(request):
         .order_by("-total_revenue", "-total_qty_sold")
     )
 
+    total_units_sold = sum(row["total_qty_sold"] or 0 for row in summary)
+    total_revenue = sum(float(row["total_revenue"] or 0) for row in summary)
+    top_product = summary[0]["product__name"] if summary else "N/A"
+
+    chart_labels = [row["product__name"] for row in summary]
+    revenue_data = [float(row["total_revenue"] or 0) for row in summary]
+    qty_data = [int(row["total_qty_sold"] or 0) for row in summary]
+
+    monthly = (
+        sales.annotate(month=TruncMonth("date"))
+        .annotate(revenue=revenue_expr)
+        .values("month")
+        .annotate(total=Sum("revenue"))
+        .order_by("month")
+    )
+
+    month_labels = [row["month"].strftime("%b %Y") for row in monthly if row["month"]]
+    month_data = [float(row["total"] or 0) for row in monthly]
+
     context = {
         "summary": summary,
         "from_date": from_date,
         "to_date": to_date,
+        "total_units_sold": total_units_sold,
+        "total_revenue": total_revenue,
+        "top_product": top_product,
+        "chart_labels": json.dumps(chart_labels),
+        "revenue_data": json.dumps(revenue_data),
+        "qty_data": json.dumps(qty_data),
+        "month_labels": json.dumps(month_labels),
+        "month_data": json.dumps(month_data),
     }
 
     return render(request, "inventory/sales_summary_report.html", context)

@@ -15,25 +15,29 @@
     {% endif %}
 {% endfor %}
 
-<div class="form-box" style="max-width: 100%; margin-bottom: 20px;">
+<div class="filter-container">
     <form method="get">
-        <p>
-            <label>Search Product</label>
-            <input type="text" name="q" value="{{ search_query }}" placeholder="Enter product name">
-        </p>
+        <div class="filter-row">
+            <div class="filter-group">
+                <label>Search Product</label>
+                <input type="text" name="q" value="{{ search_query }}" placeholder="Enter product name">
+            </div>
 
-        <p>
-            <label>From Date</label>
-            <input type="date" name="from_date" value="{{ from_date }}">
-        </p>
+            <div class="filter-group">
+                <label>From Date</label>
+                <input type="date" name="from_date" value="{{ from_date }}">
+            </div>
 
-        <p>
-            <label>To Date</label>
-            <input type="date" name="to_date" value="{{ to_date }}">
-        </p>
+            <div class="filter-group">
+                <label>To Date</label>
+                <input type="date" name="to_date" value="{{ to_date }}">
+            </div>
+        </div>
 
-        <button type="submit" class="btn">Filter</button>
-        <a href="{% url 'sale_list' %}" class="btn btn-secondary">Reset</a>
+        <div class="filter-buttons">
+            <button type="submit" class="btn-primary">Filter</button>
+            <a href="{% url 'sale_list' %}" class="btn-secondary">Reset</a>
+        </div>
     </form>
 </div>
 
@@ -73,3 +77,8 @@
     </tbody>
 </table>
 {% endblock %}
+{% for group in request.user.groups.all %}
+    {% if group.name == "Admin" or group.name == "special" or group.name == "Admin_Electronics" or group.name == "Admin_Sports" %}
+        <p><a href="{% url 'add_sale' %}" class="btn">Add Sale</a></p>
+    {% endif %}
+{% endfor %}

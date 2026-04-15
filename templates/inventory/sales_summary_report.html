@@ -5,22 +5,70 @@
 {% block content %}
 <h1>Sales Summary Report</h1>
 
-<div class="form-box" style="max-width: 100%; margin-bottom: 20px;">
+<div class="filter-container">
     <form method="get">
-        <p>
-            <label>From Date</label>
-            <input type="date" name="from_date" value="{{ from_date }}">
-        </p>
+        <div class="filter-row">
+            <div class="filter-group">
+                <label>From Date</label>
+                <input type="date" name="from_date" value="{{ from_date }}">
+            </div>
 
-        <p>
-            <label>To Date</label>
-            <input type="date" name="to_date" value="{{ to_date }}">
-        </p>
+            <div class="filter-group">
+                <label>To Date</label>
+                <input type="date" name="to_date" value="{{ to_date }}">
+            </div>
+        </div>
 
-        <button type="submit" class="btn">Filter</button>
-        <a href="{% url 'sales_summary_report' %}" class="btn btn-secondary">Reset</a>
+        <div class="filter-buttons">
+            <button type="submit" class="btn-primary">Filter</button>
+            <a href="{% url 'sales_summary_report' %}" class="btn-secondary">Reset</a>
+        </div>
     </form>
 </div>
+
+<div class="card-grid">
+    <div class="card">
+        <h3>Total Revenue</h3>
+        <p>{{ total_revenue }}</p>
+    </div>
+
+    <div class="card">
+        <h3>Total Units Sold</h3>
+        <p>{{ total_units_sold }}</p>
+    </div>
+
+    <div class="card">
+        <h3>Top Product</h3>
+        <p style="font-size: 20px;">{{ top_product }}</p>
+    </div>
+</div>
+
+<br>
+
+<div class="chart-grid">
+    <div class="chart-card">
+        <h3>Revenue by Product</h3>
+        <canvas id="revenueChart"></canvas>
+    </div>
+
+    <div class="chart-card">
+        <h3>Quantity Sold by Product</h3>
+        <canvas id="qtyChart"></canvas>
+    </div>
+
+   <div class="chart-card" style="display: flex; justify-content: center;">
+    <div style="width: 450px; height: 450px;">
+        <canvas id="pieChart"></canvas>
+    </div>
+</div>
+
+    <div class="chart-card">
+        <h3>Monthly Revenue Trend</h3>
+        <canvas id="lineChart"></canvas>
+    </div>
+</div>
+
+<br>
 
 <table>
     <thead>
@@ -46,4 +94,62 @@
         {% endfor %}
     </tbody>
 </table>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    const labels = {{ chart_labels|safe }};
+    const revenueData = {{ revenue_data|safe }};
+    const qtyData = {{ qty_data|safe }};
+    const monthLabels = {{ month_labels|safe }};
+    const monthData = {{ month_data|safe }};
+
+    new Chart(document.getElementById("revenueChart"), {
+        type: "bar",
+        data: {
+            labels: labels,
+            datasets: [{
+                label: "Revenue",
+                data: revenueData
+            }]
+        },
+        options: { responsive: true }
+    });
+
+    new Chart(document.getElementById("qtyChart"), {
+        type: "bar",
+        data: {
+            labels: labels,
+            datasets: [{
+                label: "Quantity Sold",
+                data: qtyData
+            }]
+        },
+        options: { responsive: true }
+    });
+
+    new Chart(document.getElementById("pieChart"), {
+        type: "pie",
+        data: {
+            labels: labels,
+            datasets: [{
+                data: revenueData
+            }]
+        },
+        options: { responsive: true }
+    });
+
+    new Chart(document.getElementById("lineChart"), {
+        type: "line",
+        data: {
+            labels: monthLabels,
+            datasets: [{
+                label: "Monthly Revenue",
+                data: monthData,
+                fill: false,
+                tension: 0.3
+            }]
+        },
+        options: { responsive: true }
+    });
+</script>
 {% endblock %}
